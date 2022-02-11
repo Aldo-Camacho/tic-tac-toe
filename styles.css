@@ -1,0 +1,32 @@
+body {
+    background-color: gray;
+}
+
+.tablero {
+    width: 100%;
+    max-width: 300px;
+    display: grid;
+    gap: 0;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+}
+
+.tile {
+    width: 100px;
+    height: 100px;
+}
+
+.tile:hover {
+    background-color: rgba(255, 0, 0, 0.473);
+}
+
+.white {
+    background-color: white;
+}
+.red {
+    background-color: red;
+}
+
+.black {
+    background-color: black;
+}
