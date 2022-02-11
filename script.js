@@ -142,12 +142,14 @@ function checkGame(){
         }
     });
 
-    allTiles.forEach(tile => {
-        if (!(tile.classList.contains(player1Class) || tile.classList.contains(player1Class))) {
-            return;
+    let flag = allTiles.forEach(tile => {
+        if (!tile.classList.contains(player1Class) && !tile.classList.contains(player1Class)) {
+             return false;
         }
     });
-    label.textContent = `Tie`;
-    output.appendChild(label);
-    blockTiles();
+    if (flag) {
+        label.textContent = `Tie`;
+        output.appendChild(label);
+        blockTiles();
+    }
 }
