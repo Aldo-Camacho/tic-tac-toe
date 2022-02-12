@@ -9,17 +9,26 @@
 </head>
 <body>
     <div>
-        <h1>Aldo Camacho's Tic Tac Toe</h1>
+        <h1 class="pinkNeon">Aldo Camacho's Tic Tac Toe</h1>
         <button class="spButton" onclick="singlePlayerButton()">1 player</button>
         <button class="dpButton" onclick="doublePlayerButton()">2 players</button>
+        <button class="restartButton" onclick="restartBoard()">Restart Game</button>
     </div>
-    <div class="nameContainer">
-        <div class="player1Name"></div>
-        <div class="player2Name"></div>
-        <div class="winnerName"></div>
+    <div class="container">
+        <div class="nameContainer">
+            <div class="player1Name playerNameContainer"></div>
+            <div class="player2Name playerNameContainer"></div>
+            <div class="player1Score"></div>
+            <div class="player2Score"></div>
+            <div class="winnerName"></div>
+        </div>
     </div>
-    <div class="tablero"></div>
-    <div class="nameInput"></div>
+    <div class="container">
+        <div class="tablero"></div>
+    </div>
+    <div class="container">
+        <div class="nameInput"></div>
+    </div>
 </body>
 <script src="script.js"></script>
 </html>
