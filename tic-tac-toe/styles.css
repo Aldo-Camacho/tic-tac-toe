@@ -1,12 +1,54 @@
 body {
-    background-color: gray;
+    background-color: rgb(0, 0, 0);
+    text-align: center;
+    text-decoration: none;
+    color: white;
+    font-size: 20px;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+}
+
+button {
+    color: #fff;
+    background-color: #000;
+}
+
+button:hover {
+    filter: brightness(2);
+    cursor: pointer;
+}
+
+.pinkNeon {
+    color: #000;
+    text-shadow: 
+    0 0 7px #fff,
+    0 0 10px #fff,
+    0 0 21px #fff,
+    0 0 42px #ff01aa,
+    0 0 82px #ff01aa;
+}
+
+.whiteNeon {
+    text-shadow: 
+    0 0 7px #fff,
+    0 0 10px #fff,
+    0 0 21px #fff;
 }
 
 .tablero {
-    width: 100%;
-    max-width: 300px;
+    background-color: #ff01aa;
+    box-shadow: 
+    0 0 7px #fff,
+    0 0 10px #fff,
+    0 0 21px #fff,
+    0 0 42px #ff01aa,
+    0 0 82px #ff01aa;
+    width: 320px;
     display: grid;
-    gap: 0;
+    gap: 10px;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(3, 1fr);
 }
@@ -17,16 +59,64 @@ body {
 }
 
 .tile:hover {
-    background-color: rgba(255, 0, 0, 0.473);
+    filter: brightness(0.8);
+    cursor: pointer;
 }
 
-.white {
-    background-color: white;
-}
-.red {
-    background-color: red;
+.empty {
+    background-color: rgb(0, 0, 0);
 }
 
-.black {
-    background-color: black;
+.player1 {
+    background-color: #48ff00;
+    box-shadow: 
+    0 0 7px #fff,
+    0 0 10px #fff,
+    0 0 21px #fff,
+    0 0 21px #48ff00;
+}
+
+.player2 {
+    background-color: #00ffff;
+    box-shadow: 
+    0 0 7px #fff,
+    0 0 10px #fff,
+    0 0 21px #fff,
+    0 0 21px #00ffff;
+}
+
+.nameContainer {
+    margin: 10px 20%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    width: 100%;
+    min-height: 126px;
+}
+
+.player1Name {
+    color: #48ff00;
+    grid-column: 1/2;
+    grid-row: 1;
+}
+
+.player2Name {
+    color: #00ffff;
+    grid-column: 3/4;
+    grid-row: 1;
+}
+
+.player1Score {
+    grid-column: 1/2;
+    grid-row: 2;
+}
+
+.player2Score {
+    grid-column: 3/4;
+    grid-row: 2;
+}
+
+.winnerName {
+    grid-row: 2;
+    grid-column: 2/3;
 }
