@@ -1,4 +1,6 @@
 let turn = true;
+let hasAI = false;
+let tilesBlocked = false;
 let players = ['', 'Computer'];
 let scores = [0,0];
 const player1Class = 'player1';
@@ -26,18 +28,28 @@ function activateTiles() {
     tiles.forEach(tile => {
         tile.onclick = () => {
             if (tile.classList.contains(emptyTileClass)) { 
-                if (turn) {
-                    tile.classList.replace(emptyTileClass, player1Class);    
+                if (! hasAI) {
+                    if (turn) {
+                        tile.classList.replace(emptyTileClass, player1Class);    
+                    } else {
+                        tile.classList.replace(emptyTileClass, player2Class);
+                    }
+                    toggleTurn();
+                    checkGame();
                 } else {
-                    tile.classList.replace(emptyTileClass, player2Class);
+                    tile.classList.replace(emptyTileClass, player1Class);
+                    checkGame();
+                    if (! tilesBlocked) {
+                        aITurn();
+                        checkGame();
+                    }
                 }
-                toggleTurn();
-                checkGame();
             }
         }
     });
     
     setScores();
+    tilesBlocked = false;
 }
 
 function blockTiles() {
@@ -47,10 +59,26 @@ function blockTiles() {
         }
     });
     setScores();
+    tilesBlocked = true;
 }
 
+
+function aITurn(){
+    const tiles = document.querySelectorAll(".tile");
+    let available = [];
+    tiles.forEach(tile => {
+        if(tile.classList.contains(emptyTileClass)){
+            available.push(tile);
+        }
+    });
+    console.log(available);
+    const rand = Math.floor(Math.random() * available.length);
+    console.log(rand);
+    available[rand].classList.replace(emptyTileClass,player2Class);
+}
 function restartPlayerNames(){
     scores = [0,0];
+    players = ['', 'Computer'];
     for (let i = 1; i <3; i++){
         const playerName = document.querySelector(`.player${i}Name`);
         playerName.innerHTML = '';
@@ -64,6 +92,8 @@ function restartBoard() {
     } else {
         turn = false;
     }
+    console.log(turn);
+    
     setPlayerHighlights();
     const output = document.querySelector('.winnerName');
     output.innerHTML = '';
@@ -76,15 +106,24 @@ function restartBoard() {
             tile.classList.replace(player2Class, emptyTileClass);
         }
     });
+    if (hasAI) {
+        if (!turn) {
+            aITurn();
+            toggleTurn();
+        }
+    }
     activateTiles();
 }
 
 
 function singlePlayerButton() {
+    hasAI = true;
     restartPlayerNames();
-    const nameInput = document.querySelector('.nameInput');
-    nameInput.innerHTML = '';
     playerNameIn(1);
+    const nameSection = document.querySelector(`.player${2}Name`);
+    const label = document.createElement('p');
+    label.textContent = `Player name = ${players[1]}`;
+    nameSection.append(label);
     restartBoard();
 }
 
@@ -93,26 +132,20 @@ function playerNameIn(i){
     textField.setAttribute('type', 'text');
     textField.placeholder = `Player ${i} name`;
     const nameSection = document.querySelector(`.player${i}Name`);
-    const nameInput = document.querySelector('.nameInput');  
-    nameInput.appendChild(textField);
+    nameSection.appendChild(textField);
     
     textField.onchange = () => {
         players[i-1] = textField.value;
         const label = document.createElement('p');
         label.textContent = `Player name = ${players[i-1]}`;
-        if (nameSection.firstChild){
-            nameSection.removeChild(nameSection.lastChild);
-        }
         nameSection.append(label);
         textField.remove();
     }
 }
 
 function doublePlayerButton() {
+    hasAI = false;
     restartPlayerNames();
-    const nameInput = document.querySelector('.nameInput');
-    nameInput.innerHTML ='';
-
     for (let i = 1; i < 3; i++) {
         playerNameIn(i);
     }
@@ -125,7 +158,7 @@ function toggleTurn(){
 }
 
 function setPlayerHighlights() {
-    const nameContainers = document.querySelectorAll(".playerNameContainer");
+    const nameContainers = document.querySelectorAll('.playerNameContainer');
     if (turn) {
         if (nameContainers[1].classList.contains('whiteNeon')){
             nameContainers[1].classList.remove('whiteNeon');
