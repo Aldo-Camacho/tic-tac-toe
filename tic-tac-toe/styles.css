@@ -21,6 +21,15 @@ button:hover {
     cursor: pointer;
 }
 
+input {
+    color: #fff;
+    background-color: #000;
+}
+
+input:hover {
+    filter: brightness(2);
+}
+
 .pinkNeon {
     color: #000;
     text-shadow: 
@@ -92,6 +101,7 @@ button:hover {
     grid-template-rows: repeat(2, 1fr);
     width: 100%;
     min-height: 126px;
+    align-items: center;
 }
 
 .player1Name {
