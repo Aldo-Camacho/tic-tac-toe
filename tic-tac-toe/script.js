@@ -3,24 +3,52 @@ let hasAI = false;
 let tilesBlocked = false;
 let players = ['', 'Computer'];
 let scores = [0,0];
-const player1Class = 'player1';
-const player2Class = 'player2';
+const playerClasses = ['player1', 'player2']
 const emptyTileClass = 'empty'
+let size = 3;
+let winScenarios = [];
 
 document.addEventListener('DOMContentLoaded', function () {
     initialize();
 })
 
 function initialize() {
-    const tablero = document.querySelector('.tablero');
-    for (let i = 0; i < 9; i++) {
+    setInputsEvents();
+    setBoardLayout();
+    calculateWinScenarios();
+}
+
+function setInputsEvents(){
+    const spButton = document.querySelector('.spButton');
+    const dpButton = document.querySelector('.dpButton');
+    const resetButton = document.querySelector('.resetButton');
+    const sizeInput = document.querySelector('.sizeInput');
+
+    spButton.onclick = () => singlePlayerButton();
+    dpButton.onclick = () => doublePlayerButton();
+    resetButton.onclick = () => restartBoard();
+    sizeInput.placeholder = size;
+    sizeInput.onchange = () => {
+        size = sizeInput.value;
+        setBoardLayout();
+        calculateWinScenarios();
+        restartBoard();
+    };
+}
+
+function setBoardLayout() {
+    const board = document.querySelector('.board');
+    board.innerHTML = '';
+    for (let i = 0; i < size*size; i++) {
         const tile = document.createElement('div');
         tile.id = `tile${i}`;
         tile.classList.add('tile');
         tile.classList.add(`${emptyTileClass}`);
         tile.innerHTML = ``;
-        tablero.appendChild(tile);
+        board.appendChild(tile);
     }
+    board.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+    board.style.width = `${size * 100 + (size-1)*10}`;
 }
 
 function activateTiles() {
@@ -30,18 +58,20 @@ function activateTiles() {
             if (tile.classList.contains(emptyTileClass)) { 
                 if (! hasAI) {
                     if (turn) {
-                        tile.classList.replace(emptyTileClass, player1Class);    
+                        tile.classList.replace(emptyTileClass, playerClasses[0]);    
                     } else {
-                        tile.classList.replace(emptyTileClass, player2Class);
+                        tile.classList.replace(emptyTileClass, playerClasses[1]);
                     }
-                    toggleTurn();
                     checkGame();
+                    toggleTurn();
                 } else {
-                    tile.classList.replace(emptyTileClass, player1Class);
+                    tile.classList.replace(emptyTileClass, playerClasses[0]);
                     checkGame();
                     if (! tilesBlocked) {
-                        aITurn();
-                        checkGame();
+                        setTimeout(() => {
+                            aITurn();
+                            checkGame();
+                        }, 500);
                     }
                 }
             }
@@ -62,18 +92,20 @@ function blockTiles() {
     tilesBlocked = true;
 }
 
+function toggleTurn(){
+    turn = ! turn;
+    setPlayerHighlights();
+}
 
 function aITurn(){
-    const tiles = document.querySelectorAll(".tile");
+    const tiles = document.querySelectorAll('.tile');
     let available = [];
     tiles.forEach(tile => {
         if(tile.classList.contains(emptyTileClass)){
             available.push(tile);
         }
     });
-    console.log(available);
     const rand = Math.floor(Math.random() * available.length);
-    console.log(rand);
     available[rand].classList.replace(emptyTileClass,player2Class);
 }
 function restartPlayerNames(){
@@ -92,7 +124,6 @@ function restartBoard() {
     } else {
         turn = false;
     }
-    console.log(turn);
     
     setPlayerHighlights();
     const output = document.querySelector('.winnerName');
@@ -100,10 +131,10 @@ function restartBoard() {
 
     const tiles = document.querySelectorAll('.tile');
     tiles.forEach(tile => {
-        if (tile.classList.contains(player1Class)){
-            tile.classList.replace(player1Class, emptyTileClass);
-        } else if (tile.classList.contains(player2Class)){
-            tile.classList.replace(player2Class, emptyTileClass);
+        if (tile.classList.contains(playerClasses[0])){
+            tile.classList.replace(playerClasses[0], emptyTileClass);
+        } else if (tile.classList.contains(playerClasses[1])){
+            tile.classList.replace(playerClasses[1], emptyTileClass);
         }
     });
     if (hasAI) {
@@ -127,6 +158,15 @@ function singlePlayerButton() {
     restartBoard();
 }
 
+function doublePlayerButton() {
+    hasAI = false;
+    restartPlayerNames();
+    for (let i = 1; i < 3; i++) {
+        playerNameIn(i);
+    }
+    restartBoard();
+}
+
 function playerNameIn(i){
     const textField = document.createElement('input');
     textField.setAttribute('type', 'text');
@@ -141,20 +181,6 @@ function playerNameIn(i){
         nameSection.append(label);
         textField.remove();
     }
-}
-
-function doublePlayerButton() {
-    hasAI = false;
-    restartPlayerNames();
-    for (let i = 1; i < 3; i++) {
-        playerNameIn(i);
-    }
-    restartBoard();
-}
-
-function toggleTurn(){
-    turn = ! turn;
-    setPlayerHighlights();
 }
 
 function setPlayerHighlights() {
@@ -182,56 +208,83 @@ function setScores() {
     }
 }
 
+function calculateWinScenarios() {
+    winScenarios = [];
+    let horizontal;
+    let vertical;
+    let diagonal = [];
+    let invDiagonal = [];
+    for (let i = 0; i < size; i++){
+        horizontal = [];
+        vertical = [];
+        diagonal.push(i*size + i);
+        invDiagonal.push((size-1-i)*size + i);
+        for (let j = 0; j < size; j++) {
+            horizontal.push(i*size + j);
+            vertical.push(j*size + i);
+        }
+        winScenarios.push(horizontal);
+        winScenarios.push(vertical);
+    }
+    winScenarios.push(diagonal);
+    winScenarios.push(invDiagonal);
+}
+
 function checkGame(){
     const output = document.querySelector('.winnerName');
     const label = document.createElement('p');
     const allTiles = document.querySelectorAll('.tile');
-
-    const winScenarios = [
-        [0, 1, 2],
-        [0, 3, 6],
-        [0, 4, 8],
-        [1, 4, 7],
-        [2, 4, 6],
-        [2, 5, 8],
-        [3, 4, 5],
-        [6, 7, 8]
-    ];
-
+    
     let hasWinner = false;
-    winScenarios.forEach(scenario => {
-        if (allTiles[scenario[0]].classList.contains(player1Class) 
-        && allTiles[scenario[1]].classList.contains(player1Class) 
-        && allTiles[scenario[2]].classList.contains(player1Class)){ 
-            ++scores[0];
-            hasWinner = true;
-            label.textContent = `${players[0]} wins`;
-            output.appendChild(label);
-            blockTiles();
-        } else if (allTiles[scenario[0]].classList.contains(player2Class) 
-        && allTiles[scenario[1]].classList.contains(player2Class) 
-        && allTiles[scenario[2]].classList.contains(player2Class)) {
-            ++scores[1];
-            hasWinner = true;
-            label.textContent = `${players[1]} wins`;
-            output.appendChild(label);
-            blockTiles();
-        }
-    });
+    if (isPlayerWinner(0)){ 
+        ++scores[0];
+        hasWinner = true;
+        label.textContent = `${players[0]} wins`;
+        output.appendChild(label);
+        blockTiles();
+    } else if (isPlayerWinner(1)) {
+        ++scores[1];
+        hasWinner = true;
+        label.textContent = `${players[1]} wins`;
+        output.appendChild(label);
+        blockTiles();
+    }
 
     if (!hasWinner) {
-        let flag = true
+        let tieFlag = true
         allTiles.forEach(tile => {
-            if (!(tile.classList.contains(player1Class) || tile.classList.contains(player2Class))) {
-                flag = false;
+            let containsPlayerClass = false;
+            playerClasses.forEach(playerClass => {
+                containsPlayerClass = containsPlayerClass || tile.classList.contains(playerClass);
+            })
+            if (!containsPlayerClass) {
+                tieFlag = false;
                 return;
             }
         });
         
-        if (flag) {
+        if (tieFlag) {
             label.textContent = `Tie`;
             output.appendChild(label);
             blockTiles();
         }
     }
+}
+
+function isPlayerWinner(i){
+    const allTiles = document.querySelectorAll('.tile');
+
+    let isWinner = false;
+    winScenarios.forEach((scenario) => {
+        let winnerFlag = true;
+        scenario.forEach(index => {
+            winnerFlag = winnerFlag && allTiles[index].classList.contains(playerClasses[i]);
+        });
+        if (winnerFlag){
+            isWinner = true;
+            return;
+        }
+    });
+
+    return isWinner;
 }

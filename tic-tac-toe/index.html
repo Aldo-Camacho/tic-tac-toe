@@ -10,9 +10,12 @@
 <body>
     <div>
         <h1 class="pinkNeon">Aldo Camacho's Tic Tac Toe</h1>
-        <button class="spButton" onclick="singlePlayerButton()">1 player</button>
-        <button class="dpButton" onclick="doublePlayerButton()">2 players</button>
-        <button class="restartButton" onclick="restartBoard()">Restart Game</button>
+    </div>
+    <div class="container">
+        <button class="spButton">1 player</button>
+        <button class="dpButton">2 players</button>
+        <button class="resetButton">Restart Game</button>
+        <input type="number" class="sizeInput">
     </div>
     <div class="container">
         <div class="nameContainer">
@@ -24,7 +27,7 @@
         </div>
     </div>
     <div class="container">
-        <div class="tablero"></div>
+        <div class="board"></div>
     </div>
 </body>
 <script src="script.js"></script>
