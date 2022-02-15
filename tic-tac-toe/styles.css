@@ -47,7 +47,7 @@ input:hover {
     0 0 21px #fff;
 }
 
-.tablero {
+.board {
     background-color: #ff01aa;
     box-shadow: 
     0 0 7px #fff,
@@ -55,11 +55,8 @@ input:hover {
     0 0 21px #fff,
     0 0 42px #ff01aa,
     0 0 82px #ff01aa;
-    width: 320px;
     display: grid;
     gap: 10px;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(3, 1fr);
 }
 
 .tile {
