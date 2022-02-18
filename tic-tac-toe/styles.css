@@ -56,12 +56,6 @@ input:hover {
     0 0 42px #ff01aa,
     0 0 82px #ff01aa;
     display: grid;
-    gap: 10px;
-}
-
-.tile {
-    width: 100px;
-    height: 100px;
 }
 
 .tile:hover {

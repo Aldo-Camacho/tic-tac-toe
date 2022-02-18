@@ -6,7 +6,7 @@ let scores = [0,0];
 const playerClasses = ['player1', 'player2']
 const emptyTileClass = 'empty'
 let size = 3;
-let winScenarios = [];
+let tilesToWin = size;
 
 document.addEventListener('DOMContentLoaded', function () {
     initialize();
@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', function () {
 function initialize() {
     setInputsEvents();
     setBoardLayout();
-    calculateWinScenarios();
 }
 
 function setInputsEvents(){
@@ -23,32 +22,48 @@ function setInputsEvents(){
     const dpButton = document.querySelector('.dpButton');
     const resetButton = document.querySelector('.resetButton');
     const sizeInput = document.querySelector('.sizeInput');
+    const tilesToWinInput = document.querySelector('.tilesToWinInput');
 
     spButton.onclick = () => singlePlayerButton();
     dpButton.onclick = () => doublePlayerButton();
     resetButton.onclick = () => restartBoard();
-    sizeInput.placeholder = size;
+    sizeInput.placeholder = 'Select the size of the board, f.e: 3 = 3x3 board';
     sizeInput.onchange = () => {
         size = sizeInput.value;
         setBoardLayout();
-        calculateWinScenarios();
         restartBoard();
     };
+    tilesToWinInput.placeholder = 'Select the size of the line to win, f.e: 3 = 3 tiles in a row';
+    tilesToWinInput.onchange = () =>{
+        if (tilesToWin <= size) {
+        tilesToWin = tilesToWinInput.value;
+        } else {
+            tilesToWin = size;
+        }
+        restartBoard();
+    } 
 }
 
 function setBoardLayout() {
     const board = document.querySelector('.board');
+    const screenWidth = 350;
+    let responsiveSize = Math.floor(screenWidth/size);
+    let gap = Math.ceil(responsiveSize/10);
     board.innerHTML = '';
     for (let i = 0; i < size*size; i++) {
         const tile = document.createElement('div');
-        tile.id = `tile${i}`;
+        tile.id = `tile_${i}`;
         tile.classList.add('tile');
         tile.classList.add(`${emptyTileClass}`);
         tile.innerHTML = ``;
+        tile.style.width = `${responsiveSize}px`;
+        tile.style.height = `${responsiveSize}px`;
         board.appendChild(tile);
     }
     board.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
-    board.style.width = `${size * 100 + (size-1)*10}`;
+    board.style.gap = `${gap}px`;
+    board.style.width = `${responsiveSize*size + (size-1)*gap}px`;
+    board.style.height = `${responsiveSize*size + (size-1)*gap}px`;
 }
 
 function activateTiles() {
@@ -56,21 +71,22 @@ function activateTiles() {
     tiles.forEach(tile => {
         tile.onclick = () => {
             if (tile.classList.contains(emptyTileClass)) { 
+                const tileNumber = parseInt(tile.id.split('_').pop(), 10);
                 if (! hasAI) {
                     if (turn) {
-                        tile.classList.replace(emptyTileClass, playerClasses[0]);    
+                        tile.classList.replace(emptyTileClass, playerClasses[0]);   
+                        checkIfPlayerWon(0,tileNumber); 
                     } else {
                         tile.classList.replace(emptyTileClass, playerClasses[1]);
+                        checkIfPlayerWon(1,tileNumber);
                     }
-                    checkGame();
                     toggleTurn();
                 } else {
                     tile.classList.replace(emptyTileClass, playerClasses[0]);
-                    checkGame();
+                    checkIfPlayerWon(0,tileNumber);
                     if (! tilesBlocked) {
                         setTimeout(() => {
                             aITurn();
-                            checkGame();
                         }, 500);
                     }
                 }
@@ -106,7 +122,9 @@ function aITurn(){
         }
     });
     const rand = Math.floor(Math.random() * available.length);
-    available[rand].classList.replace(emptyTileClass,player2Class);
+    const tile = available[rand];
+    tile.classList.replace(emptyTileClass,playerClasses[1]);
+    checkIfPlayerWon(1, parseInt(tile.id.split('_').pop(), 10));
 }
 function restartPlayerNames(){
     scores = [0,0];
@@ -208,83 +226,80 @@ function setScores() {
     }
 }
 
-function calculateWinScenarios() {
-    winScenarios = [];
-    let horizontal;
-    let vertical;
-    let diagonal = [];
-    let invDiagonal = [];
-    for (let i = 0; i < size; i++){
-        horizontal = [];
-        vertical = [];
-        diagonal.push(i*size + i);
-        invDiagonal.push((size-1-i)*size + i);
-        for (let j = 0; j < size; j++) {
-            horizontal.push(i*size + j);
-            vertical.push(j*size + i);
-        }
-        winScenarios.push(horizontal);
-        winScenarios.push(vertical);
-    }
-    winScenarios.push(diagonal);
-    winScenarios.push(invDiagonal);
-}
-
-function checkGame(){
+function checkIfPlayerWon(player, tile){
+    
+    const tiles = document.querySelectorAll('.tile');
+    const row = Math.floor(tile/size);
+    const col = tile % size;
+    const diagonalRow = row-Math.min(row,col);
+    const diagonalCol = col-Math.min(row,col);
+    const invDiagonalRow = row+Math.min(size-1-row,col);
+    const invDiagonalCol = col-Math.min(size-1-row,col);
     const output = document.querySelector('.winnerName');
     const label = document.createElement('p');
-    const allTiles = document.querySelectorAll('.tile');
-    
-    let hasWinner = false;
-    if (isPlayerWinner(0)){ 
-        ++scores[0];
-        hasWinner = true;
-        label.textContent = `${players[0]} wins`;
-        output.appendChild(label);
-        blockTiles();
-    } else if (isPlayerWinner(1)) {
-        ++scores[1];
-        hasWinner = true;
-        label.textContent = `${players[1]} wins`;
-        output.appendChild(label);
-        blockTiles();
-    }
 
-    if (!hasWinner) {
-        let tieFlag = true
+    let horizontal = 0, vertical = 0, diagonal=0, invDiagonal = 0;
+    let maxHorizontal = 0, maxVertical = 0, maxDiagonal = 0, maxInvDiagonal = 0;
+    for(let i = 0; i < size; i++){
+        if (tiles[row*size + i].classList.contains(playerClasses[player])){
+            ++horizontal;
+        } else {
+            horizontal=0;
+        }
+        if (horizontal > maxHorizontal){
+            maxHorizontal = horizontal;
+        }
+        if (tiles[(i * size) + col].classList.contains(playerClasses[player])){
+            ++vertical;
+        } else {
+            vertical=0;
+        }
+        if (vertical > maxVertical){
+            maxVertical = vertical;
+        }
+    }
+    
+    for (let i = 0; i < Math.min(size-diagonalRow, size-diagonalCol); i++){
+        if (tiles[(diagonalRow + i)*size+diagonalCol+i].classList.contains(playerClasses[player])) {
+            ++diagonal;
+        }
+        else {
+            diagonal = 0;
+        }
+        if (diagonal > maxDiagonal){
+            maxDiagonal = diagonal;
+        }
+    }
+    for (let i = 0; i < Math.min(invDiagonalRow + 1, size-invDiagonalCol); i++){
+        if (tiles[(invDiagonalRow-i)*size + invDiagonalCol + i].classList.contains(playerClasses[player])) {
+            ++invDiagonal;
+        }
+        else {
+            invDiagonal = 0;
+        }
+        if (invDiagonal > maxInvDiagonal){
+            maxInvDiagonal = invDiagonal;
+        }
+    }
+    if (maxHorizontal == tilesToWin || maxVertical == tilesToWin || maxDiagonal == tilesToWin || maxInvDiagonal == tilesToWin){
+        ++scores[player];
+        hasWinner = true;
+        label.textContent = `${players[player]} wins`;
+        output.appendChild(label);
+        blockTiles();
+    } else {
+        const allTiles = document.querySelectorAll('.tile');
+        let tieFlag = true;
         allTiles.forEach(tile => {
-            let containsPlayerClass = false;
-            playerClasses.forEach(playerClass => {
-                containsPlayerClass = containsPlayerClass || tile.classList.contains(playerClass);
-            })
-            if (!containsPlayerClass) {
+            if(tile.classList.contains(emptyTileClass)) {
                 tieFlag = false;
                 return;
             }
         });
-        
-        if (tieFlag) {
-            label.textContent = `Tie`;
+        if(tieFlag){
+            label.textContent = 'Tie';
             output.appendChild(label);
             blockTiles();
         }
-    }
-}
-
-function isPlayerWinner(i){
-    const allTiles = document.querySelectorAll('.tile');
-
-    let isWinner = false;
-    winScenarios.forEach((scenario) => {
-        let winnerFlag = true;
-        scenario.forEach(index => {
-            winnerFlag = winnerFlag && allTiles[index].classList.contains(playerClasses[i]);
-        });
-        if (winnerFlag){
-            isWinner = true;
-            return;
-        }
-    });
-
-    return isWinner;
+    } 
 }
